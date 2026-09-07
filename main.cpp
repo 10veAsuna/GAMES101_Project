@@ -1,5 +1,6 @@
 // clang-format off
 #include <iostream>
+#include <cmath>
 #include <opencv2/opencv.hpp>
 #include "rasterizer.hpp"
 #include "global.hpp"
@@ -30,10 +31,36 @@ Eigen::Matrix4f get_model_matrix(float rotation_angle)
 
 Eigen::Matrix4f get_projection_matrix(float eye_fov, float aspect_ratio, float zNear, float zFar)
 {
-    // TODO: Copy-paste your implementation from the previous assignment.
-    Eigen::Matrix4f projection;
+    const float radian = eye_fov * MY_PI / 180.0f;
+    const float t = zNear * std::tan(radian / 2.0f);
+    const float b = -t;
+    const float r = t * aspect_ratio;
+    const float l = -r;
 
-    return projection;
+    // The camera looks along the negative Z axis, so these are view-space
+    // plane coordinates rather than the positive near/far distances.
+    const float n = -zNear;
+    const float f = -zFar;
+
+    Eigen::Matrix4f persp;
+    persp << n, 0, 0, 0,
+             0, n, 0, 0,
+             0, 0, n + f, -n * f,
+             0, 0, 1, 0;
+
+    Eigen::Matrix4f translate;
+    translate << 1, 0, 0, -(r + l) / 2.0f,
+                 0, 1, 0, -(t + b) / 2.0f,
+                 0, 0, 1, -(n + f) / 2.0f,
+                 0, 0, 0, 1;
+
+    Eigen::Matrix4f scale;
+    scale << 2.0f / (r - l), 0, 0, 0,
+             0, 2.0f / (t - b), 0, 0,
+             0, 0, 2.0f / (n - f), 0,
+             0, 0, 0, 1;
+
+    return scale * translate * persp;
 }
 
 int main(int argc, const char** argv)

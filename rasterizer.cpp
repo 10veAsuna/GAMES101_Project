@@ -41,8 +41,17 @@ auto to_vec4(const Eigen::Vector3f& v3, float w = 1.0f)
 
 
 static bool insideTriangle(int x, int y, const Vector3f* _v)
-{   
-    // TODO : Implement this function to check if the point (x, y) is inside the triangle represented by _v[0], _v[1], _v[2]
+{
+    // For counter-clockwise vertices, a point is inside when it lies on the
+    // left side of every directed edge.  A zero cross product is on an edge.
+    const float cross0 = (_v[1].x() - _v[0].x()) * (y - _v[0].y()) -
+                         (_v[1].y() - _v[0].y()) * (x - _v[0].x());
+    const float cross1 = (_v[2].x() - _v[1].x()) * (y - _v[1].y()) -
+                         (_v[2].y() - _v[1].y()) * (x - _v[1].x());
+    const float cross2 = (_v[0].x() - _v[2].x()) * (y - _v[2].y()) -
+                         (_v[0].y() - _v[2].y()) * (x - _v[2].x());
+
+    return cross0 >= 0.0f && cross1 >= 0.0f && cross2 >= 0.0f;
 }
 
 static std::tuple<float, float, float> computeBarycentric2D(float x, float y, const Vector3f* v)
@@ -54,7 +63,7 @@ static std::tuple<float, float, float> computeBarycentric2D(float x, float y, co
 }
 
 void rst::rasterizer::draw(pos_buf_id pos_buffer, ind_buf_id ind_buffer, col_buf_id col_buffer, Primitive type)
-{
+{   
     auto& buf = pos_buf[pos_buffer.pos_id];
     auto& ind = ind_buf[ind_buffer.ind_id];
     auto& col = col_buf[col_buffer.col_id];
