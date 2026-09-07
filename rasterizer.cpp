@@ -118,6 +118,37 @@ void rst::rasterizer::rasterize_triangle(const Triangle& t) {
     // TODO : Find out the bounding box of current triangle.
     // iterate through the pixel and find if the current pixel is inside the triangle
 
+    int xMax = ceil(std::max(std::max(t.v[0].x(), t.v[1].x()), t.v[2].x()));
+    int xMin = floor(std::min(std::min(t.v[0].x(), t.v[1].x()), t.v[2].x()));
+    int yMax = ceil(std::max(std::max(t.v[0].y(), t.v[1].y()), t.v[2].y()));
+    int yMin = floor(std::min(std::min(t.v[0].y(), t.v[1].y()), t.v[2].y()));
+    xMax = xMax < width ? xMax : width - 1;
+    xMin = xMin > 0 ? xMin : 0;
+    yMax = yMax < height ? yMax : height - 1;
+    yMin = yMin > 0 ? yMin : 0;
+
+    for (int y = yMin; y <= yMax; y++)
+    {
+        for (int x = xMin; x <= xMax; x++)
+        {
+            if (insideTriangle(x, y, t.v))
+            {
+                auto[alpha, beta, gamma] = computeBarycentric2D(x, y, t.v);
+                float w_reciprocal = 1.0/(alpha / v[0].w() + beta / v[1].w() + gamma / v[2].w());
+                float z_interpolated = alpha * v[0].z() / v[0].w() + beta * v[1].z() / v[1].w() + gamma * v[2].z() / v[2].w();
+                z_interpolated *= w_reciprocal;
+
+                int index = get_index(x, y);
+                if (z_interpolated < depth_buf[index])
+                {
+                    depth_buf[index] = z_interpolated;
+                    set_pixel(Eigen::Vector3f(x, y, z_interpolated), t.getColor());
+                }
+            }
+        }
+    }
+    
+
     // If so, use the following code to get the interpolated z value.
     //auto[alpha, beta, gamma] = computeBarycentric2D(x, y, t.v);
     //float w_reciprocal = 1.0/(alpha / v[0].w() + beta / v[1].w() + gamma / v[2].w());
