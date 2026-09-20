@@ -4,12 +4,9 @@
       "name": "MinGW64",
       "compilerPath": "C:/msys64/mingw64/bin/g++.exe",
       "intelliSenseMode": "windows-gcc-x64",
-      "cStandard": "c17",
       "cppStandard": "c++17",
-      "compileCommands": "${workspaceFolder}/Assignment4/build/compile_commands.json",
       "includePath": [
-        "${workspaceFolder}/Assignment3",
-        "${workspaceFolder}/Assignment4",
+        "${workspaceFolder}",
         "C:/msys64/mingw64/include",
         "C:/msys64/mingw64/include/opencv5"
       ]
