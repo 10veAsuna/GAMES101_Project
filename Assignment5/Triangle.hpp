@@ -25,6 +25,7 @@ bool rayTriangleIntersect(const Vector3f& v0, const Vector3f& v1, const Vector3f
     Vector3f qvec = crossProduct(tvec, e1);
     v = dotProduct(dir, qvec) * invDet;
     if (v < 0 || u + v > 1) return false;
+    
     tnear = dotProduct(e2, qvec) * invDet;
     return tnear > 0;
 }
